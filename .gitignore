@@ -3,3 +3,5 @@
 /app/node_modules
 
 /infra/.terraform
+
+/infra/terraform.tfvars

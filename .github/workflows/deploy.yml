@@ -25,6 +25,34 @@ jobs:
           script: |
             echo "Connected to EC2"
 
+            # conditional check to install nodejs
+            if ! command -v node >/dev/null 2>&1; then
+              echo "Node not found, Installing it..."
+              sudo apt update
+
+              sudo apt install nodejs -y
+            else
+              echo "Node already installed"
+            fi
+
+            # conditional check to install npm
+            if ! command -v npm >/dev/null 2>&1; then
+              echo "NPM not found, Installing it..."
+
+              sudo apt install npm -y
+            else
+              echo "NPM already installed"
+            fi
+
+            # conditional check to install pm2
+            if ! command -v pm2 >/dev/null 2>&1; then
+              echo "PM2 not found, Installing it..."
+
+              sudo npm i pm2 -g
+            else
+              echo "PM2 already installed"
+            fi
+
             # Create a app dir, if exists mkdir does nothing like no error
             sudo mkdir -p /var/www/poc10-app
 
@@ -47,6 +75,9 @@ jobs:
 
                 git clone "https://github.com/arjunsharma6622/poc10-aws-app" .
             fi
+
+            echo "Chanding directory to app"
+            cd app
 
             echo "Installing npm..."
             npm i
