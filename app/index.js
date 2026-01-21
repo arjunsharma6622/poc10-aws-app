@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 app.get("/", (req, res) => {
-    res.send("Hello from POC10 Server");
+    res.send("Hello from POC10 Server, updated code test");
 })
 
 const PORT = process.env.PORT;
