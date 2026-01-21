@@ -1,0 +1,57 @@
+name: POC-10 EC2 CI/CD Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1 - Checkout repo
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2 - SSH into EC2 and deploy
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            echo "Connected to EC2"
+
+            # Create a app dir, if exists mkdir does nothing like no error
+            sudo mkdir -p /var/www/poc10-app
+
+            # CHOWN of that app
+            sudo chown ${{ secrets.EC2_USER }}:${{ secrets.EC2_USER }} /var/www/poc10-app
+
+            # Go to the app dir
+            cd /var/www/poc10-app || exit 1
+
+
+            # check if .git is there in the app
+            if [ -d .git ]; then
+                echo "Git repo found!"
+                echo "Pulling latest changes"
+
+                git pull
+            else
+                echo "Git repo not found!"
+                echo "Cloning the repo"
+
+                git clone "https://github.com/arjunsharma6622/poc10-aws-app" .
+            fi
+
+            echo "Installing npm..."
+            npm i
+
+            echo "Starting/Reloading PM2"
+            pm2 start ecosystem.config.js || pm2 reload ecosystem.config.js
+
+            echo "Deployment Completed Succesfully"
